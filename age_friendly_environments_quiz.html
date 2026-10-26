@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Age-friendly Environments – Quiz</title>
+<style>
+:root{--navy:#12336b;--blue:#2456a6;--pale:#edf3fc;--ink:#202938;--muted:#5e6878;--green:#1d7548;--red:#a73333}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f6fa;color:var(--ink);line-height:1.5}
+header{background:var(--navy);color:white;padding:28px 18px}
+.wrap{max-width:850px;margin:auto} .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;opacity:.85}
+h1{font-size:clamp(1.8rem,4vw,2.7rem);margin:.25rem 0} header p{max-width:650px;margin:.5rem 0 0;color:#e6edfa}
+main{padding:24px 16px 48px}.panel{background:white;border-radius:18px;padding:clamp(18px,4vw,30px);box-shadow:0 8px 28px #172b4d12;margin-bottom:18px}
+h2{margin-top:0;color:var(--navy)} .levels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.level{border:2px solid #d6deec;background:white;border-radius:13px;padding:17px 12px;text-align:left;cursor:pointer;color:var(--ink);transition:.15s}
+.level:hover,.level:focus{border-color:var(--blue);background:var(--pale);outline:none}.level strong{display:block;font-size:1.05rem}.level span{font-size:.9rem;color:var(--muted)}
+button{font:inherit}.primary{background:var(--blue);color:white;border:0;border-radius:10px;padding:11px 18px;cursor:pointer;font-weight:700}.primary:hover{background:var(--navy)}.secondary{background:white;border:1px solid #cbd4e2;border-radius:10px;padding:10px 16px;cursor:pointer}
+.hidden{display:none!important}.progressrow{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:.92rem}
+.track{height:8px;background:#e5eaf2;border-radius:99px;overflow:hidden;margin:10px 0 22px}.fill{height:100%;background:var(--blue);width:0;transition:width .2s}
+#question{font-size:1.2rem;font-weight:700;margin:8px 0 18px}.answers{display:grid;gap:10px}.answer{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;background:white;border:1px solid #d5dce8;border-radius:11px;padding:13px;cursor:pointer}.answer:hover:not(:disabled){border-color:var(--blue);background:#f6f8fd}.answer .letter{flex:0 0 27px;height:27px;display:grid;place-items:center;border-radius:7px;background:#edf1f8;font-weight:700;color:var(--navy)}.answer.correct{border-color:var(--green);background:#edf8f1}.answer.wrong{border-color:var(--red);background:#fff1f1}.answer:disabled{cursor:default}
+.feedback{margin-top:15px;padding:13px;border-radius:10px;background:#f1f4f9}.feedback.good{background:#edf8f1}.feedback.bad{background:#fff1f1}.actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}.score{font-size:2.2rem;font-weight:800;color:var(--navy)}.small{color:var(--muted);font-size:.9rem}footer{text-align:center;color:var(--muted);font-size:.85rem;padding:0 16px 25px}
+@media(max-width:560px){.levels{grid-template-columns:1fr}.level{display:flex;justify-content:space-between;align-items:center}.level span{margin-left:8px}.actions{flex-direction:column}.actions button{width:100%}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="eyebrow">Lernquiz · WHO-Thema</div><h1>Age-friendly Environments</h1><p>Teste dein Wissen darüber, wie Städte und Gemeinschaften altersfreundlicher werden können. Wähle eine Schwierigkeitsstufe.</p></div></header>
+<main class="wrap">
+<section id="start" class="panel">
+<h2>Wähle dein Quiz</h2>
+<p>Jede Runde hat 5 Fragen. Du bekommst nach jeder Antwort direkt eine kurze Rückmeldung und am Ende dein Ergebnis.</p>
+<div class="levels">
+<button class="level" data-level="leicht"><strong>Leicht</strong><span>Grundwissen · 5 Fragen</span></button>
+<button class="level" data-level="mittel"><strong>Mittelschwer</strong><span>Zusammenhänge · 5 Fragen</span></button>
+<button class="level" data-level="schwer"><strong>Schwer</strong><span>Genaues Verständnis · 5 Fragen</span></button>
+</div>
+<p class="small" style="margin-top:18px">Das Quiz verwendet ausschließlich die Informationen aus dem bereitgestellten WHO-Screenshot.</p>
+</section>
+<section id="quiz" class="panel hidden" aria-live="polite">
+<div class="progressrow"><span id="levelLabel">Quiz</span><span id="count">Frage 1 von 5</span></div>
+<div class="track"><div id="fill" class="fill"></div></div>
+<div id="question"></div><div id="answers" class="answers"></div>
+<div id="feedback" class="feedback hidden"></div>
+<div class="actions"><button id="quit" class="secondary">Zur Auswahl</button><button id="next" class="primary" disabled>Weiter</button></div>
+</section>
+<section id="result" class="panel hidden">
+<h2>Runde abgeschlossen!</h2><div class="score" id="score"></div><p id="summary"></p>
+<div class="actions"><button id="again" class="primary">Gleiche Stufe erneut spielen</button><button id="home" class="secondary">Andere Stufe wählen</button></div>
+</section>
+</main>
+<footer>Age-friendly Environments · Quiz für den Unterricht</footer>
+<script>
+const quizzes = {
+leicht: [
+{q:"Was ist das Ziel altersfreundlicher Städte und Gemeinschaften?",a:["Bessere Orte schaffen, in denen Menschen alt werden können","Nur neue Gebäude für junge Menschen bauen","Alle Dienstleistungen auf eine einzige Stadt begrenzen","Mentoring vollständig ersetzen"],c:0,e:"Das Netzwerk unterstützt Städte und Gemeinschaften dabei, bessere Orte zum Älterwerden zu schaffen."},
+{q:"Wie viele Städte und Gemeinschaften gehören laut Screenshot zum WHO Global Network?",a:["Mehr als 130","Mehr als 1.300","Genau 44","Weniger als 50"],c:1,e:"Der Screenshot nennt mehr als 1.300 Städte und Gemeinschaften."},
+{q:"In wie vielen Ländern ist das Netzwerk laut Screenshot vertreten?",a:["14","30","44","130"],c:2,e:"Im Screenshot steht, dass das Netzwerk in 44 Ländern aktiv ist."},
+{q:"Wofür steht MENTOR-AFE?",a:["Ein Programm zur Fernbetreuung und zum Mentoring","Ein Netzwerk nur für Krankenhäuser","Eine Liste von Produkten für ältere Menschen","Ein Programm für den Städtebau ohne Beratung"],c:0,e:"MENTOR-AFE wird als Fern-Mentoring-Programm für altersfreundliche Umgebungen beschrieben."},
+{q:"Was sollen altersfreundliche Umgebungen fördern?",a:["Gesundes Altern","Weniger Beteiligung älterer Menschen","Mehr Barrieren","Einheitliche Bedürfnisse aller älteren Menschen"],c:0,e:"Altersfreundliche Maßnahmen und Angebote sollen gesundes Altern fördern."}
+],
+mittel: [
+{q:"Welche Aufgabe haben Mentorinnen und Mentoren im MENTOR-AFE-Programm?",a:["Sie geben Anleitung und Unterstützung, damit Mentees bestimmte Fähigkeiten entwickeln","Sie entscheiden anstelle älterer Menschen über deren Wünsche","Sie zählen nur die Städte im Netzwerk","Sie entfernen alle Dienstleistungen aus Gemeinden"],c:0,e:"Mentorinnen und Mentoren unterstützen die Mentees dabei, die für ihre Arbeit benötigten Fähigkeiten zu entwickeln."},
+{q:"Welche Bereiche können laut Screenshot altersfreundlicher gestaltet werden?",a:["Nur Gebäude","Politik, Systeme, Produkte und Dienstleistungen","Nur öffentliche Verkehrsmittel","Ausschließlich medizinische Geräte"],c:1,e:"Der Screenshot nennt ausdrücklich policies, systems, products and services – also Politik, Systeme, Produkte und Dienstleistungen."},
+{q:"Was bedeutet es, auf ältere Menschen in gerechter Weise einzugehen?",a:["Alle gleich behandeln, ohne ihre Umstände zu beachten","Bedürfnisse und Vorlieben erkennen und angemessen darauf reagieren","Entscheidungen grundsätzlich für sie treffen","Nur die Bedürfnisse der Mehrheit berücksichtigen"],c:1,e:"Altersfreundliche Praxis soll unterschiedliche Lebensumstände beachten und auf Bedürfnisse und Vorlieben gerecht reagieren."},
+{q:"Warum arbeiten Städte und Gemeinschaften im WHO-Netzwerk zusammen?",a:["Um ihre physischen und sozialen Umgebungen zu verbessern","Um einheitliche Regeln für alle älteren Menschen weltweit vorzuschreiben","Um Mentoring durch Wettbewerbe zu ersetzen","Um ältere Menschen aus der Planung auszuschließen"],c:0,e:"Das Netzwerk arbeitet daran, physische und soziale Umgebungen zu verbessern."},
+{q:"Welche Aussage passt zur Beschreibung altersfreundlicher Praxis?",a:["Sie berücksichtigt die Vielfalt älterer Menschen","Sie geht davon aus, dass alle älteren Menschen dieselben Fähigkeiten haben","Sie schützt nur Menschen, die keine eigenen Entscheidungen treffen","Sie konzentriert sich ausschließlich auf Produkte"],c:0,e:"Der Screenshot betont die große Vielfalt bei Fähigkeiten und Lebensumständen älterer Menschen."}
+],
+schwer: [
+{q:"Welche Kombination beschreibt die Ziele altersfreundlicher Praxis am vollständigsten?",a:["Barrieren abbauen, passende Politik und Angebote entwickeln, Entscheidungen respektieren und besonders gefährdete Menschen schützen","Nur mehr Mentoren ausbilden und die Bedürfnisse aller gleichsetzen","Vor allem Produkte entwickeln und persönliche Entscheidungen begrenzen","Nur die physische Umgebung verbessern und soziale Umgebungen ausklammern"],c:0,e:"Der Screenshot nennt das Entfernen von Barrieren, Politik, Systeme, Produkte und Dienstleistungen, Respekt vor Entscheidungen sowie den Schutz besonders gefährdeter Menschen."},
+{q:"Welche Aussage unterscheidet das Netzwerk und das MENTOR-AFE-Programm korrekt?",a:["Das Netzwerk verbindet Städte und Gemeinschaften; MENTOR-AFE ist ein Fern-Mentoring-Programm zum Aufbau von Fähigkeiten","Beide Begriffe bezeichnen ausschließlich eine Liste altersfreundlicher Produkte","MENTOR-AFE ist das Netzwerk aus mehr als 1.300 Städten","Das Netzwerk dient nur dazu, einzelne Mentorinnen und Mentoren zu prüfen"],c:0,e:"Das Netzwerk bringt Städte und Gemeinschaften zusammen; MENTOR-AFE unterstützt den Aufbau von Fähigkeiten durch Mentoring auf Distanz."},
+{q:"Eine Gemeinde entwickelt neue Dienstleistungen, beachtet aber weder die unterschiedlichen Lebensumstände noch die Entscheidungen älterer Menschen. Was fehlt nach dem Screenshot besonders?",a:["Eine gerechte Reaktion auf unterschiedliche Bedürfnisse sowie Respekt vor Entscheidungen und Wahlmöglichkeiten","Eine Begrenzung auf genau 44 Dienstleistungen","Ein Ersatz für alle Mentoring-Angebote","Die Konzentration auf nur eine Art älterer Menschen"],c:0,e:"Altersfreundliche Praxis soll Unterschiede beachten, Bedürfnisse und Vorlieben gerecht berücksichtigen und Entscheidungen respektieren."},
+{q:"Welche Aussage lässt sich aus den Angaben zum WHO Global Network ableiten?",a:["Es ist international ausgerichtet und umfasst Städte und Gemeinschaften in vielen Ländern","Es besteht aus genau 44 Städten in einem Land","Es arbeitet ausschließlich über ein Mentoring-Programm","Es zählt nur Produkte und Dienstleistungen, keine Gemeinschaften"],c:0,e:"Die Angaben von mehr als 1.300 Städten und Gemeinschaften in 44 Ländern zeigen die internationale Ausrichtung."},
+{q:"Warum ist es wichtig, besonders gefährdete ältere Menschen zu schützen?",a:["Der Screenshot nennt den Schutz der besonders gefährdeten Menschen ausdrücklich als Teil altersfreundlicher Praxis","Weil alle älteren Menschen dieselben Bedürfnisse haben","Damit ältere Menschen keine eigenen Entscheidungen mehr treffen","Damit nur die physischen Umgebungen verbessert werden"],c:0,e:"Der Schutz besonders gefährdeter Menschen wird im Screenshot ausdrücklich als Teil altersfreundlicher Praxis genannt."}
+]
+};
+let level="leicht", index=0, score=0, locked=false;
+const $=id=>document.getElementById(id);
+function show(id){["start","quiz","result"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
+function begin(l){level=l;index=0;score=0;show("quiz");render()}
+function render(){
+ locked=false; const item=quizzes[level][index];
+ $("levelLabel").textContent=({leicht:"Leicht",mittel:"Mittelschwer",schwer:"Schwer"})[level]+" · Age-friendly Environments";
+ $("count").textContent=`Frage ${index+1} von ${quizzes[level].length}`;
+ $("fill").style.width=(index/quizzes[level].length*100)+"%";
+ $("question").textContent=item.q; $("answers").innerHTML=""; $("feedback").className="feedback hidden"; $("feedback").textContent="";
+ $("next").disabled=true; $("next").textContent=index===quizzes[level].length-1?"Ergebnis anzeigen":"Weiter";
+ item.a.forEach((label,i)=>{const b=document.createElement("button");b.className="answer";b.innerHTML=`<span class="letter">${String.fromCharCode(65+i)}</span><span></span>`;b.querySelector("span:last-child").textContent=label;b.addEventListener("click",()=>answer(i));$("answers").appendChild(b)});
+}
+function answer(choice){
+ if(locked)return;locked=true;const item=quizzes[level][index];const buttons=[...$("answers").querySelectorAll("button")];
+ buttons.forEach((b,i)=>{b.disabled=true;if(i===item.c)b.classList.add("correct");if(i===choice&&choice!==item.c)b.classList.add("wrong")});
+ const ok=choice===item.c;if(ok)score++;
+ $("feedback").textContent=(ok?"Richtig! ":"Noch nicht ganz. ")+item.e;
+ $("feedback").className="feedback "+(ok?"good":"bad");$("next").disabled=false;
+}
+function next(){if(!locked)return;if(index<quizzes[level].length-1){index++;render()}else{show("result");$("fill").style.width="100%";$("score").textContent=`${score} / ${quizzes[level].length}`;$("summary").textContent=score===5?"Stark! Du hast alle Fragen richtig beantwortet.":score>=3?"Gut gemacht! Du hast die wichtigsten Inhalte teilweise sicher erkannt.":"Übe die Inhalte noch einmal und versuche es erneut.";$("again").textContent="Gleiche Stufe erneut spielen"}}
+document.querySelectorAll(".level").forEach(b=>b.addEventListener("click",()=>begin(b.dataset.level)));
+$("next").addEventListener("click",next);$("quit").addEventListener("click",()=>show("start"));
+$("again").addEventListener("click",()=>begin(level));$("home").addEventListener("click",()=>show("start"));
+</script>
+</body></html>
